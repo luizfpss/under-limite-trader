@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Under limite</title>
+  
+  <style>
+    /* --- v17.3 - Ajuste Fino (Tamanho Fonte Próximo Gol) --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html {
+      font-size: 10px; 
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 100%; 
+      background: #f5f5f5;
+      min-width: 380px; /* Largura mínima para 5 colunas */
+      min-height: 380px; 
+      overflow-y: auto; 
+    }
+    .container {
+      background: white; 
+      width: 100%;
+    }
+    
+    /* --- LAYOUT DE GRID (v17.0 - 5 Colunas) --- */
+    .status-grid {
+      display: grid;
+      /* Define 5 colunas */
+      grid-template-columns: 1.1fr 0.9fr 0.9fr 1.3fr 1fr; 
+      background: #f8f9fa;
+      border-bottom: 1px solid #e0e0e0;
+      text-align: center;
+    }
+    .grid-item {
+      padding: 1.2rem 0.5rem; /* Menos padding lateral */
+      border-right: 1px solid #e0e0e0;
+      /* Ajusta a altura mínima para caber 2 linhas de valor */
+      min-height: 5.5rem; 
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .grid-item:last-child {
+      border-right: none;
+    }
+    .grid-label {
+      display: block;
+      font-size: 1.0rem; /* Reduzido para caber */
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .grid-value {
+      display: block;
+      font-size: 1.5rem; /* Reduzido para caber */
+      font-weight: 700;
+      color: #1e88e5; 
+      margin-bottom: 0.2rem; /* Espaço para o valor secundário */
+      line-height: 1.1; /* Impede que o texto pule muito */
+    }
+    
+    /* *** (v17.0) - Estilo para a info secundária *** */
+    .grid-value-secondary {
+      display: block;
+      font-size: 1.2rem; /* Menor */
+      font-weight: 600;
+      color: #666; /* Cor normal (sem cor) */
+      line-height: 1.1; /* Impede que o texto pule muito */
+    }
+
+    /* Estilos dos valores específicos */
+    #odd-stale-timer { color: #333; }
+    #odd-stale-timer.warning { color: #e74c3c; }
+    #odd-per-minute { color: #8B4513; }
+    #market-rhythm-value { color: #ff9900; }
+    #tick-percent-value { color: #e74c3c; }
+    #next-target-odd { color: #1e88e5; }
+    #tick-range-value { color: #666; }
+
+
+    /* --- LAYOUT DAS ODDS PRINCIPAIS --- */
+    .odds-grid {
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr; 
+      gap: 1.5rem; 
+      background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+    }
+    .odd-section {
+      text-align: center;
+      padding: 2rem;
+      border-radius: 1.2rem;
+      box-shadow: 0 0.2rem 0.8rem rgba(0,0,0,0.1);
+    }
+    /* Cores Corrigidas (v17.2) */
+    .bet365-section {
+      background: linear-gradient(135deg, #005646 0%, #00705a 100%); 
+      color: white;
+    }
+    .betfair-section {
+      background: linear-gradient(135deg, #e69a00 0%, #ffbb33 100%); 
+      color: #333; 
+    }
+    .section-label {
+      font-size: 1.2rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1rem;
+      margin-bottom: 1rem;
+      opacity: 0.9;
+    }
+    .odd-value {
+      font-size: 3.2rem;
+      font-weight: bold;
+      margin: 1rem 0;
+    }
+    .odd-value.large {
+      font-size: 3.6rem;
+    }
+    .market-info,
+    .reference-info {
+      font-size: 1.1rem;
+      margin-top: 0.8rem;
+      opacity: 0.8;
+    }
+
+    /* --- LAYOUT PRÓXIMO GOL --- */
+    .next-goal-section {
+      padding: 1.5rem 2rem;
+      background: #333; 
+      color: white;
+      border-top: 1px solid #444;
+    }
+    .next-goal-title {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 1.2rem;
+      color: #f0f0f0;
+    }
+    .next-goal-body {
+      display: flex;
+      justify-content: space-around; 
+      align-items: center;
+    }
+    /* *** MUDANÇA (v17.3): Fonte aumentada *** */
+    .next-goal-team {
+      font-size: 1.4rem; /* Aumentado de 1.4rem */
+      color: #f0f0f0;
+    }
+    .status-bar { display: none; }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+    
+    /* Estilo do Botão Destacar */
+    #btn-detach:hover {
+        background: #555 !important;
+    }
+  </style>
+  </head>
+<body>
+  <div class="container">
+
+    <!-- BOTÃO PARA DESTACAR A JANELA -->
+    <button id="btn-detach" style="
+        width: 100%; 
+        background: #333; 
+        color: white; 
+        border: none; 
+        padding: 8px; 
+        cursor: pointer; 
+        font-size: 12px;
+        font-weight: bold;
+        border-bottom: 1px solid #555;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;">
+        🔓 Destacar Janela (Arrastar)
+    </button>
+
+    <div class="status-grid">
+      <div class="grid-item">
+        <span class="grid-label">Tempo de Jogo</span>
+        <span id="game-time-value" class="grid-value">--:--</span>
+      </div>
+      <div class="grid-item">
+        <span class="grid-label">Risco</span> 
+        <span id="market-rhythm-value" class="grid-value">--</span> 
+        <span id="next-target-odd" class="grid-value-secondary">--.--</span> 
+      </div>
+      <div class="grid-item">
+        <span class="grid-label">Tick %</span>
+        <span id="tick-percent-value" class="grid-value">-- %</span>
+        </div>
+      <div class="grid-item">
+        <span class="grid-label">Ticks/Min</span> 
+        <span id="odd-per-minute" class="grid-value">--</span> 
+        <span id="added-time-label" class="grid-value-secondary">(--m)</span> 
+      </div>
+      <div class="grid-item"> 
+        <span class="grid-label">Odd Parada</span>
+        <span id="odd-stale-timer" class="grid-value">--s</span>
+      </div>
+    </div>
+
+
+    <div class="odds-grid">
+      <div class="odd-section bet365-section">
+        <div class="section-label">Bet365 Under</div>
+        <div id="bet365-odd" class="odd-value large">-</div>
+        <div id="market-name" class="market-info">-</div>
+      </div>
+
+      <div class="odd-section betfair-section">
+        <div class="section-label">Betfair Alvo</div>
+        <div id="betfair-target" class="odd-value large">-</div>
+        <div class="reference-info">Valor da Tabela</div>
+      </div>
+    </div>
+    
+    <div class="next-goal-section" id="next-goal-section" style="display: none;">
+      <div id="next-goal-title" class="next-goal-title">-- Gol</div>
+      <div class="next-goal-body">
+        <div id="next-goal-home" class="next-goal-team">--: -.--</div>
+        <div id="next-goal-away" class="next-goal-team">--: -.--</div>
+      </div>
+    </div>
+
+    <div class="status-bar" style="display: none;">
+      <span class="status-label">Status:</span>
+      <span id="status" class="status-badge status-waiting">Aguardando...</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
